@@ -1135,8 +1135,11 @@ async function runFlashcards(){
   try {
     const prompt = `Generate exactly 8 high-quality flashcards from the following content. Return ONLY a raw JSON array — no markdown, no backticks, no preamble. Each object must have "q" (question, concise) and "a" (answer, clear and complete, 1-2 sentences max).\n\nContent:\n${text}`;
     const result = await callClaude([{role:'user',content:prompt}]);
-    const clean = result.replace(/```json|```/g,'').trim();
-    const cards = JSON.parse(clean).map(c=>({...c,level:0}));
+    // Robustly extract JSON array even if model adds surrounding text
+    const stripped = result.replace(/```json|```/g,'').trim();
+    const arrMatch = stripped.match(/\[[\s\S]*\]/);
+    if(!arrMatch) throw new Error('No JSON array in response');
+    const cards = JSON.parse(arrMatch[0]).map(c=>({...c,level:0}));
     const email = DB.get('currentUser');
     const decks = DB.get('decks_'+email) || [];
     const deck = {id:'d'+Date.now(),name,created:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'}),cards,studied:0};
@@ -1260,8 +1263,10 @@ async function runSummarize(){
   const prompt = `You are Lumina, an AI study assistant. Summarize the following notes. ${styleMap[style]}\n\nNotes:\n${text.slice(0,3000)}`;
   try {
     const result = await callClaude([{role:'user',content:prompt}]);
-    const clean = result.replace(/```json|```/g,'').trim();
-    const data = JSON.parse(clean);
+    const stripped2 = result.replace(/```json|```/g,'').trim();
+    const objMatch = stripped2.match(/\{[\s\S]*\}/);
+    if(!objMatch) throw new Error('No JSON object in response');
+    const data = JSON.parse(objMatch[0]);
     renderSummary(data, style);
     document.getElementById('summarizeCopyBtn').style.display='inline-flex';
     incStat('summaries');
@@ -1332,8 +1337,10 @@ Include 5 days per week (Mon-Fri). Each day should have 2-3 tasks totalling ~${h
 
   try {
     const result = await callClaude([{role:'user',content:prompt}], 1500);
-    const clean = result.replace(/```json|```/g,'').trim();
-    const plan = JSON.parse(clean);
+    const stripped3 = result.replace(/```json|```/g,'').trim();
+    const planMatch = stripped3.match(/\[[\s\S]*\]/);
+    if(!planMatch) throw new Error('No JSON array in response');
+    const plan = JSON.parse(planMatch[0]);
     // Save to localStorage
     const email = DB.get('currentUser');
     const existingPlan = DB.get('plan_'+email) || {};
