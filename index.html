@@ -1,0 +1,1488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lumina — AI Study Assistant</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#1a1a14;--ink-mid:#3d3d30;--ink-light:#6b6b55;
+  --parchment:#f7f4ec;--cream:#fdfbf5;
+  --moss:#2d4a2d;--moss-light:#3d6b3d;--moss-faint:#edf4ed;
+  --amber:#c4820a;--amber-light:#f5e8cc;--amber-faint:#fdf6e8;
+  --red:#d94040;--red-faint:#fdf0f0;
+  --border:rgba(26,26,20,0.12);
+  --serif:'Cormorant Garamond',Georgia,serif;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --radius:12px;--shadow:0 4px 24px rgba(26,26,20,0.08);
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--cream);color:var(--ink);font-size:16px;line-height:1.7;overflow-x:hidden}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;align-items:center;justify-content:space-between;padding:0 5%;height:64px;background:rgba(253,251,245,0.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+.nav-logo{font-family:var(--serif);font-size:24px;font-weight:600;color:var(--moss);letter-spacing:-.02em;text-decoration:none;cursor:pointer}
+.nav-logo span{color:var(--amber)}
+.nav-links{display:flex;gap:32px;list-style:none}
+.nav-links a{text-decoration:none;color:var(--ink-mid);font-size:14px;transition:color .2s;cursor:pointer}
+.nav-links a:hover{color:var(--moss)}
+.nav-actions{display:flex;gap:10px;align-items:center}
+.btn-ghost{background:none;border:1px solid var(--border);color:var(--ink);padding:8px 18px;border-radius:8px;font-size:14px;font-weight:400;cursor:pointer;font-family:var(--sans);transition:all .2s}
+.btn-ghost:hover{background:var(--parchment)}
+.btn-nav{background:var(--moss);color:#fff;padding:9px 20px;border-radius:8px;font-size:14px;font-weight:500;border:none;cursor:pointer;font-family:var(--sans);transition:all .2s}
+.btn-nav:hover{background:var(--moss-light);transform:translateY(-1px)}
+
+/* ── HERO ── */
+.hero{min-height:100vh;display:flex;align-items:center;padding:100px 5% 80px;position:relative;overflow:hidden}
+.hero-bg{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 80% 60% at 70% 50%,#edf4ed 0%,transparent 70%),radial-gradient(ellipse 50% 40% at 10% 80%,#fdf6e8 0%,transparent 60%)}
+.hero-content{position:relative;max-width:640px}
+.hero-tag{display:inline-flex;align-items:center;gap:8px;background:var(--amber-faint);border:1px solid rgba(196,130,10,0.25);border-radius:100px;padding:6px 14px;font-size:13px;color:var(--amber);font-weight:500;margin-bottom:28px;animation:fadeUp .6s ease both}
+.hero-tag::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--amber)}
+h1{font-family:var(--serif);font-size:clamp(48px,7vw,80px);font-weight:600;line-height:1.05;letter-spacing:-.02em;color:var(--ink);margin-bottom:24px;animation:fadeUp .6s .1s ease both}
+h1 em{font-style:italic;color:var(--moss)}
+.hero-sub{font-size:18px;color:var(--ink-light);line-height:1.65;max-width:520px;margin-bottom:40px;font-weight:300;animation:fadeUp .6s .2s ease both}
+.hero-actions{display:flex;gap:14px;flex-wrap:wrap;animation:fadeUp .6s .3s ease both}
+.btn-primary{display:inline-flex;align-items:center;gap:8px;background:var(--moss);color:#fff;padding:14px 28px;border-radius:10px;font-size:15px;font-weight:500;text-decoration:none;border:none;cursor:pointer;font-family:var(--sans);transition:all .2s}
+.btn-primary:hover{background:var(--moss-light);transform:translateY(-2px);box-shadow:0 8px 24px rgba(45,74,45,.25)}
+.btn-secondary{display:inline-flex;align-items:center;gap:8px;background:transparent;color:var(--ink);padding:14px 28px;border-radius:10px;font-size:15px;font-weight:400;text-decoration:none;border:1px solid var(--border);cursor:pointer;font-family:var(--sans);transition:all .2s}
+.btn-secondary:hover{background:var(--parchment)}
+.hero-stats{display:flex;gap:40px;margin-top:56px;animation:fadeUp .6s .4s ease both}
+.stat-num{font-family:var(--serif);font-size:32px;font-weight:600;color:var(--ink);display:block}
+.stat-label{font-size:13px;color:var(--ink-light)}
+.hero-visual{position:absolute;right:4%;top:50%;transform:translateY(-50%);width:min(400px,38vw);display:grid;gap:12px;animation:fadeUp .7s .2s ease both}
+.card-float{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow)}
+.card-float-label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-light);margin-bottom:8px}
+.card-float-text{font-size:14px;color:var(--ink-mid);line-height:1.5}
+.card-float-tag{display:inline-block;background:var(--moss-faint);color:var(--moss);font-size:11px;padding:3px 10px;border-radius:100px;margin-top:10px;font-weight:500}
+.flash-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.flash-chip{background:var(--amber-faint);border:1px solid rgba(196,130,10,.2);color:var(--amber);font-size:12px;padding:4px 12px;border-radius:100px}
+.ai-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#22c55e;margin-right:6px;animation:pulse 2s infinite}
+
+/* ── LANDING SECTIONS ── */
+.logos{padding:28px 5%;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--parchment)}
+.logos-inner{max-width:960px;margin:0 auto;display:flex;align-items:center;gap:48px;flex-wrap:wrap;justify-content:center}
+.logos p{font-size:13px;color:var(--ink-light);white-space:nowrap}
+.logo-item{font-family:var(--serif);font-size:22px;color:var(--ink-light);opacity:.6;font-weight:600}
+section.land{padding:100px 5%}
+.section-tag{display:inline-block;font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--moss);font-weight:500;margin-bottom:16px}
+h2.land{font-family:var(--serif);font-size:clamp(36px,4vw,54px);font-weight:600;line-height:1.1;letter-spacing:-.02em;color:var(--ink);margin-bottom:16px}
+h2.land em{font-style:italic;color:var(--moss)}
+.section-sub{font-size:18px;color:var(--ink-light);font-weight:300;max-width:520px;line-height:1.6}
+.section-header{max-width:640px;margin-bottom:64px}
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px}
+.feature-card{background:#fff;border:1px solid var(--border);border-radius:16px;padding:32px 28px;transition:transform .25s,box-shadow .25s;position:relative;overflow:hidden;opacity:0}
+.feature-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--moss);transform:scaleX(0);transform-origin:left;transition:transform .3s}
+.feature-card:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(26,26,20,.1)}
+.feature-card:hover::before{transform:scaleX(1)}
+.feature-icon{width:52px;height:52px;border-radius:14px;background:var(--moss-faint);display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:20px}
+.feature-card h3{font-family:var(--serif);font-size:22px;font-weight:600;margin-bottom:10px}
+.feature-card p{font-size:15px;color:var(--ink-light);line-height:1.65}
+.feature-badge{display:inline-block;background:var(--amber-faint);color:var(--amber);font-size:11px;padding:3px 10px;border-radius:100px;margin-top:16px;font-weight:500}
+.pricing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;max-width:900px}
+.pricing-card{background:#fff;border:1px solid var(--border);border-radius:20px;padding:36px 32px;position:relative;transition:all .25s;opacity:0}
+.pricing-card:hover{transform:translateY(-4px);box-shadow:0 16px 48px rgba(26,26,20,.1)}
+.pricing-card.featured{background:var(--moss);border-color:var(--moss);transform:scale(1.04)}
+.pricing-card.featured:hover{transform:scale(1.04) translateY(-4px)}
+.pricing-tag{position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:var(--amber);color:#fff;font-size:12px;font-weight:500;padding:4px 16px;border-radius:100px;white-space:nowrap}
+.pricing-name{font-size:14px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-light);margin-bottom:12px;font-weight:500}
+.pricing-card.featured .pricing-name{color:rgba(255,255,255,.6)}
+.pricing-price{font-family:var(--serif);font-size:52px;font-weight:600;line-height:1;margin-bottom:4px}
+.pricing-card.featured .pricing-price{color:#fff}
+.pricing-per{font-size:14px;color:var(--ink-light);margin-bottom:28px}
+.pricing-card.featured .pricing-per{color:rgba(255,255,255,.55)}
+.pricing-divider{border:none;border-top:1px solid var(--border);margin-bottom:24px}
+.pricing-card.featured .pricing-divider{border-color:rgba(255,255,255,.15)}
+.pricing-features{list-style:none;display:flex;flex-direction:column;gap:12px;margin-bottom:32px}
+.pricing-features li{font-size:15px;color:var(--ink-mid);display:flex;align-items:flex-start;gap:10px}
+.pricing-card.featured .pricing-features li{color:rgba(255,255,255,.85)}
+.check{color:var(--moss);font-size:16px;flex-shrink:0;margin-top:1px}
+.pricing-card.featured .check{color:#a8c8a8}
+.pricing-cta{width:100%;padding:13px;border-radius:10px;font-size:15px;font-weight:500;cursor:pointer;transition:all .2s;border:none;font-family:var(--sans);background:var(--moss);color:#fff}
+.pricing-cta:hover{background:var(--moss-light)}
+.pricing-card.featured .pricing-cta{background:#fff;color:var(--moss)}
+.pricing-card.featured .pricing-cta:hover{background:var(--parchment)}
+.testimonials-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
+.testimonial{background:#fff;border:1px solid var(--border);border-radius:16px;padding:28px 24px;opacity:0}
+.testimonial-stars{color:var(--amber);font-size:16px;margin-bottom:14px;letter-spacing:2px}
+.testimonial-text{font-size:15px;color:var(--ink-mid);line-height:1.7;margin-bottom:20px}
+.testimonial-author{display:flex;align-items:center;gap:12px}
+.author-avatar{width:40px;height:40px;border-radius:50%;background:var(--moss-faint);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:16px;font-weight:600;color:var(--moss);flex-shrink:0}
+.author-name{font-size:14px;font-weight:500}
+.author-meta{font-size:13px;color:var(--ink-light)}
+.cta-banner{padding:100px 5%;background:var(--ink);text-align:center}
+.cta-banner h2{font-family:var(--serif);font-size:clamp(36px,4vw,54px);font-weight:600;line-height:1.1;letter-spacing:-.02em;color:#fff;margin-bottom:16px}
+.cta-banner h2 em{font-style:italic;color:#a8c8a8}
+.cta-banner p{color:rgba(255,255,255,.5);margin-bottom:40px;font-size:18px;font-weight:300}
+.cta-note{font-size:13px;color:rgba(255,255,255,.3);margin-top:16px}
+footer{padding:48px 5% 32px;background:var(--ink);border-top:1px solid rgba(255,255,255,.08)}
+.footer-inner{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:32px;margin-bottom:40px}
+.footer-brand p{font-size:14px;color:rgba(255,255,255,.35);max-width:240px;line-height:1.6;margin-top:8px}
+.footer-links h4{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.35);margin-bottom:14px;font-weight:500}
+.footer-links ul{list-style:none;display:flex;flex-direction:column;gap:8px}
+.footer-links a{font-size:14px;color:rgba(255,255,255,.55);text-decoration:none;transition:color .2s;cursor:pointer}
+.footer-links a:hover{color:rgba(255,255,255,.9)}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.08);padding-top:24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.footer-bottom p{font-size:13px;color:rgba(255,255,255,.25)}
+
+/* ── AUTH MODAL ── */
+.modal-overlay{position:fixed;inset:0;z-index:500;background:rgba(26,26,20,.6);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn .2s ease}
+.modal-box{background:#fff;border-radius:20px;padding:40px;width:100%;max-width:420px;position:relative;animation:slideUp .3s ease}
+.modal-close{position:absolute;top:16px;right:16px;background:none;border:none;font-size:20px;cursor:pointer;color:var(--ink-light);width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:8px;transition:background .2s}
+.modal-close:hover{background:var(--parchment)}
+.modal-logo{font-family:var(--serif);font-size:28px;font-weight:600;color:var(--moss);margin-bottom:8px}
+.modal-logo span{color:var(--amber)}
+.modal-sub{font-size:14px;color:var(--ink-light);margin-bottom:28px}
+.auth-tabs{display:flex;background:var(--parchment);border-radius:10px;padding:4px;margin-bottom:28px}
+.auth-tab{flex:1;padding:9px;border-radius:8px;border:none;background:none;font-size:14px;font-weight:400;cursor:pointer;font-family:var(--sans);color:var(--ink-light);transition:all .2s}
+.auth-tab.active{background:#fff;color:var(--ink);font-weight:500;box-shadow:0 1px 4px rgba(26,26,20,.1)}
+.form-group{margin-bottom:16px}
+.form-label{font-size:13px;color:var(--ink-mid);font-weight:500;margin-bottom:6px;display:block}
+.form-input{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:15px;font-family:var(--sans);color:var(--ink);background:#fff;outline:none;transition:border-color .2s}
+.form-input:focus{border-color:var(--moss)}
+.form-input::placeholder{color:var(--ink-light);opacity:.6}
+.plan-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:6px}
+.plan-option{border:2px solid var(--border);border-radius:10px;padding:12px;cursor:pointer;transition:all .2s;text-align:center}
+.plan-option.selected{border-color:var(--moss);background:var(--moss-faint)}
+.plan-option input{display:none}
+.plan-name{font-size:14px;font-weight:500;color:var(--ink)}
+.plan-price{font-size:13px;color:var(--ink-light);margin-top:2px}
+.plan-option.selected .plan-name,.plan-option.selected .plan-price{color:var(--moss)}
+.auth-btn{width:100%;padding:13px;background:var(--moss);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:500;cursor:pointer;font-family:var(--sans);transition:all .2s;margin-top:8px}
+.auth-btn:hover{background:var(--moss-light)}
+.auth-btn:disabled{opacity:.6;cursor:not-allowed}
+.auth-divider{text-align:center;font-size:13px;color:var(--ink-light);margin:16px 0;position:relative}
+.auth-divider::before,.auth-divider::after{content:'';position:absolute;top:50%;width:42%;height:1px;background:var(--border)}
+.auth-divider::before{left:0}
+.auth-divider::after{right:0}
+.demo-login-btn{width:100%;padding:12px;background:var(--amber-faint);color:var(--amber);border:1px solid rgba(196,130,10,.25);border-radius:10px;font-size:14px;font-weight:500;cursor:pointer;font-family:var(--sans);transition:all .2s}
+.demo-login-btn:hover{background:var(--amber-light)}
+.form-error{font-size:13px;color:var(--red);margin-top:8px;display:none}
+
+/* ── APP SHELL ── */
+#appShell{display:none;position:fixed;inset:0;z-index:300;background:var(--parchment)}
+.app-layout{display:flex;height:100vh}
+.sidebar{width:240px;background:var(--ink);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
+.sidebar-logo{padding:24px 20px 16px;font-family:var(--serif);font-size:22px;font-weight:600;color:#a8c8a8;letter-spacing:-.02em}
+.sidebar-logo span{color:var(--amber)}
+.sidebar-section{padding:8px 12px;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.25);font-weight:500;margin-top:8px}
+.sidebar-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;margin:2px 8px;cursor:pointer;color:rgba(255,255,255,.5);font-size:14px;transition:all .2s;text-decoration:none;border:none;background:none;font-family:var(--sans);width:calc(100% - 16px)}
+.sidebar-item:hover{background:rgba(255,255,255,.08);color:rgba(255,255,255,.85)}
+.sidebar-item.active{background:rgba(255,255,255,.12);color:#fff;font-weight:500}
+.sidebar-item-icon{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+.sidebar-bottom{margin-top:auto;padding:16px 8px}
+.sidebar-upgrade{background:rgba(196,130,10,.15);border:1px solid rgba(196,130,10,.25);border-radius:10px;padding:14px;margin-bottom:12px;display:none}
+.sidebar-upgrade p{font-size:13px;color:rgba(255,255,255,.7);line-height:1.5;margin-bottom:10px}
+.upgrade-btn{width:100%;padding:8px;background:var(--amber);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans)}
+.sidebar-user{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;cursor:pointer;border:none;background:none;font-family:var(--sans);color:rgba(255,255,255,.6);font-size:14px;transition:all .2s;width:100%}
+.sidebar-user:hover{background:rgba(255,255,255,.06)}
+.user-avatar{width:32px;height:32px;border-radius:50%;background:var(--moss);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:14px;font-weight:600;color:#fff;flex-shrink:0}
+.user-info{text-align:left}
+.user-name-small{font-size:13px;font-weight:500;color:rgba(255,255,255,.85)}
+.user-plan-small{font-size:11px;color:rgba(255,255,255,.35);text-transform:capitalize}
+.app-main{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+.app-topbar{padding:0 32px;height:60px;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:sticky;top:0;z-index:10}
+.topbar-title{font-family:var(--serif);font-size:22px;font-weight:600;color:var(--ink)}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.topbar-btn{background:none;border:1px solid var(--border);color:var(--ink-mid);padding:7px 16px;border-radius:8px;font-size:13px;cursor:pointer;font-family:var(--sans);transition:all .2s}
+.topbar-btn:hover{background:var(--parchment)}
+.topbar-btn.primary{background:var(--moss);color:#fff;border-color:var(--moss)}
+.topbar-btn.primary:hover{background:var(--moss-light)}
+.app-content{padding:32px;flex:1}
+
+/* ── VIEWS ── */
+.view{display:none}
+.view.active{display:block;animation:fadeUp .35s ease}
+
+/* Dashboard */
+.dash-welcome{margin-bottom:32px}
+.dash-welcome h2{font-family:var(--serif);font-size:34px;font-weight:600;margin-bottom:4px}
+.dash-welcome p{color:var(--ink-light);font-size:16px}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px}
+.stat-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:20px;transition:all .2s}
+.stat-card:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+.stat-card-label{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-light);margin-bottom:8px}
+.stat-card-num{font-family:var(--serif);font-size:32px;font-weight:600;color:var(--ink)}
+.stat-card-change{font-size:12px;color:#22c55e;margin-top:4px}
+.dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.dash-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:24px}
+.dash-card h3{font-family:var(--serif);font-size:18px;font-weight:600;margin-bottom:16px}
+.quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.quick-action{background:var(--parchment);border:1px solid var(--border);border-radius:10px;padding:16px;cursor:pointer;transition:all .2s;text-align:left;font-family:var(--sans);width:100%}
+.quick-action:hover{background:var(--moss-faint);border-color:var(--moss)}
+.qa-icon{font-size:20px;margin-bottom:8px;display:block}
+.qa-label{font-size:14px;font-weight:500;color:var(--ink);display:block}
+.qa-sub{font-size:12px;color:var(--ink-light);margin-top:2px;display:block}
+.activity-list{display:flex;flex-direction:column;gap:12px}
+.activity-item{display:flex;align-items:center;gap:12px;padding:12px;background:var(--parchment);border-radius:8px}
+.activity-icon{width:36px;height:36px;border-radius:8px;background:var(--moss-faint);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.activity-text{flex:1}
+.activity-title{font-size:14px;font-weight:500;color:var(--ink)}
+.activity-time{font-size:12px;color:var(--ink-light)}
+.activity-empty{font-size:14px;color:var(--ink-light);text-align:center;padding:24px 0}
+
+/* Tool shared */
+.tool-layout{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
+.tool-input-card,.tool-output-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:28px}
+.tool-section-label{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-light);font-weight:500;margin-bottom:12px}
+.tool-textarea{width:100%;border:1px solid var(--border);border-radius:8px;padding:14px;font-size:14px;font-family:var(--sans);color:var(--ink);resize:vertical;outline:none;min-height:160px;line-height:1.65;transition:border-color .2s}
+.tool-textarea:focus{border-color:var(--moss)}
+.tool-textarea::placeholder{color:var(--ink-light);opacity:.6}
+.tool-run-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px;background:var(--moss);color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:500;cursor:pointer;font-family:var(--sans);transition:all .2s;margin-top:16px}
+.tool-run-btn:hover{background:var(--moss-light)}
+.tool-run-btn:disabled{opacity:.6;cursor:not-allowed}
+.tool-output-area{min-height:200px;font-size:15px;color:var(--ink-mid);line-height:1.75}
+.output-placeholder{color:var(--ink-light);font-size:14px;text-align:center;padding:32px 20px}
+.output-placeholder-icon{font-size:32px;margin-bottom:12px;display:block}
+
+/* File upload */
+.dropzone{border:2px dashed var(--border);border-radius:10px;padding:28px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:16px;position:relative}
+.dropzone:hover,.dropzone.drag-over{border-color:var(--moss);background:var(--moss-faint)}
+.dropzone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
+.dz-icon{font-size:28px;margin-bottom:8px}
+.dz-text{font-size:14px;color:var(--ink-light)}
+.dz-text strong{color:var(--moss);font-weight:500}
+.dz-hint{font-size:12px;color:var(--ink-light);margin-top:4px;opacity:.7}
+.file-badge{display:inline-flex;align-items:center;gap:6px;background:var(--moss-faint);color:var(--moss);border:1px solid rgba(45,74,45,.2);border-radius:100px;padding:4px 12px;font-size:13px;margin-top:8px}
+.file-remove{background:none;border:none;cursor:pointer;color:var(--moss);font-size:14px;padding:0 2px}
+
+/* Flashcards */
+.deck-list{display:flex;flex-direction:column;gap:12px}
+.deck-item{background:#fff;border:1px solid var(--border);border-radius:10px;padding:18px 20px;display:flex;align-items:center;justify-content:space-between;transition:all .2s}
+.deck-item:hover{border-color:rgba(45,74,45,.3);box-shadow:0 2px 12px rgba(26,26,20,.06)}
+.deck-info h4{font-family:var(--serif);font-size:18px;font-weight:600;margin-bottom:3px}
+.deck-meta{font-size:13px;color:var(--ink-light)}
+.deck-progress{width:80px;height:6px;background:var(--border);border-radius:3px;margin-top:8px}
+.deck-progress-fill{height:100%;background:var(--moss);border-radius:3px;transition:width .5s}
+.deck-actions{display:flex;gap:8px}
+.deck-btn{padding:7px 14px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);transition:all .2s;border:1px solid var(--border);background:#fff;color:var(--ink)}
+.deck-btn:hover{background:var(--parchment)}
+.deck-btn.study{background:var(--moss);color:#fff;border-color:var(--moss)}
+.deck-btn.study:hover{background:var(--moss-light)}
+.deck-btn.danger{color:var(--red);border-color:rgba(217,64,64,.2)}
+.deck-btn.danger:hover{background:var(--red-faint)}
+.empty-state{text-align:center;padding:60px 20px;color:var(--ink-light)}
+.empty-icon{font-size:40px;margin-bottom:12px;display:block}
+.empty-title{font-family:var(--serif);font-size:22px;font-weight:600;color:var(--ink-mid);margin-bottom:6px}
+.empty-sub{font-size:15px;margin-bottom:24px}
+.fc-create-section{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:28px;margin-bottom:24px}
+.fc-create-section h3{font-family:var(--serif);font-size:20px;font-weight:600;margin-bottom:16px}
+.deck-name-input{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:15px;font-family:var(--sans);margin-bottom:12px;outline:none;transition:border-color .2s;color:var(--ink)}
+.deck-name-input:focus{border-color:var(--moss)}
+
+/* Study mode */
+.study-mode{max-width:640px;margin:0 auto;text-align:center}
+.study-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px}
+.study-back{background:none;border:1px solid var(--border);padding:8px 16px;border-radius:8px;font-size:14px;cursor:pointer;font-family:var(--sans);display:flex;align-items:center;gap:6px;transition:all .2s;color:var(--ink-mid)}
+.study-back:hover{background:var(--parchment)}
+.study-progress-wrap{flex:1;margin:0 20px}
+.study-progress-bar{height:6px;background:var(--border);border-radius:3px}
+.study-progress-fill{height:100%;background:var(--moss);border-radius:3px;transition:width .4s}
+.study-counter{font-size:13px;color:var(--ink-light);margin-top:6px;text-align:center}
+.flashcard-3d{width:100%;height:260px;perspective:1000px;cursor:pointer;margin-bottom:24px}
+.flashcard-inner{position:relative;width:100%;height:100%;transition:transform .5s;transform-style:preserve-3d}
+.flashcard-3d.flipped .flashcard-inner{transform:rotateY(180deg)}
+.flashcard-face{position:absolute;inset:0;border-radius:16px;border:1px solid var(--border);background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;backface-visibility:hidden;box-shadow:0 8px 32px rgba(26,26,20,.08)}
+.flashcard-face.back{transform:rotateY(180deg);background:var(--moss-faint);border-color:rgba(45,74,45,.2)}
+.fc-face-label{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-light);margin-bottom:16px}
+.flashcard-face.back .fc-face-label{color:var(--moss)}
+.fc-face-text{font-family:var(--serif);font-size:24px;font-weight:400;color:var(--ink);line-height:1.4;text-align:center}
+.flashcard-face.back .fc-face-text{color:var(--moss-light)}
+.fc-hint{font-size:13px;color:var(--ink-light);margin-top:32px}
+.study-actions{display:flex;gap:14px;justify-content:center;margin-top:8px}
+.study-btn{padding:13px 32px;border-radius:10px;font-size:15px;font-weight:500;cursor:pointer;font-family:var(--sans);transition:all .2s;border:none}
+.study-btn.miss{background:var(--red-faint);color:var(--red)}
+.study-btn.miss:hover{background:#f7d5d5}
+.study-btn.know{background:var(--moss-faint);color:var(--moss)}
+.study-btn.know:hover{background:#d6ecd6}
+.study-btn.flip{background:var(--parchment);color:var(--ink);border:1px solid var(--border)}
+.study-btn.flip:hover{background:var(--amber-faint)}
+.study-complete{text-align:center;padding:40px 20px}
+.study-complete-icon{font-size:48px;margin-bottom:16px}
+.study-complete h3{font-family:var(--serif);font-size:30px;font-weight:600;margin-bottom:8px}
+.study-complete p{color:var(--ink-light);margin-bottom:24px}
+.score-row{display:flex;gap:20px;justify-content:center;margin-bottom:28px}
+.score-item{text-align:center;padding:16px 24px;border-radius:10px}
+.score-item.good{background:var(--moss-faint)}
+.score-item.bad{background:var(--red-faint)}
+.score-num{font-family:var(--serif);font-size:32px;font-weight:600}
+.score-item.good .score-num{color:var(--moss)}
+.score-item.bad .score-num{color:var(--red)}
+.score-label{font-size:13px;color:var(--ink-light);margin-top:4px}
+
+/* Summarize */
+.summary-output-list{list-style:none;display:flex;flex-direction:column;gap:8px}
+.summary-output-list li{display:flex;align-items:flex-start;gap:10px;font-size:15px;line-height:1.65;color:var(--ink-mid)}
+.summary-bullet{width:6px;height:6px;border-radius:50%;background:var(--moss);flex-shrink:0;margin-top:9px}
+.summary-section-title{font-family:var(--serif);font-size:18px;font-weight:600;color:var(--ink);margin:20px 0 10px}
+.summary-bottom-line{background:var(--amber-faint);border-left:3px solid var(--amber);padding:12px 16px;border-radius:0 8px 8px 0;font-size:14px;color:var(--ink-mid);margin-top:16px;line-height:1.6}
+.copy-btn{display:inline-flex;align-items:center;gap:6px;background:var(--parchment);border:1px solid var(--border);color:var(--ink-mid);padding:8px 16px;border-radius:8px;font-size:13px;cursor:pointer;font-family:var(--sans);margin-top:16px;transition:all .2s}
+.copy-btn:hover{background:var(--moss-faint);color:var(--moss);border-color:rgba(45,74,45,.3)}
+
+/* Planner */
+.planner-form{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:28px;margin-bottom:24px}
+.planner-form h3{font-family:var(--serif);font-size:20px;font-weight:600;margin-bottom:20px}
+.subject-list{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
+.subject-row{display:flex;gap:10px;align-items:center}
+.subject-input,.date-input{padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:var(--sans);outline:none;transition:border-color .2s;color:var(--ink)}
+.subject-input{flex:1}
+.date-input{width:160px}
+.subject-input:focus,.date-input:focus{border-color:var(--moss)}
+.subject-remove{background:none;border:none;color:var(--ink-light);cursor:pointer;font-size:18px;padding:4px;transition:color .2s}
+.subject-remove:hover{color:var(--red)}
+.add-subject-btn{background:none;border:1px dashed var(--border);color:var(--ink-light);padding:9px 16px;border-radius:8px;font-size:14px;cursor:pointer;font-family:var(--sans);transition:all .2s;display:flex;align-items:center;gap:6px}
+.add-subject-btn:hover{border-color:var(--moss);color:var(--moss);background:var(--moss-faint)}
+.plan-week{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:16px}
+.plan-week-title{font-family:var(--serif);font-size:18px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.week-badge{background:var(--moss-faint);color:var(--moss);font-size:12px;padding:3px 10px;border-radius:100px;font-family:var(--sans);font-weight:500}
+.plan-days{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.plan-day{background:var(--parchment);border-radius:8px;padding:12px}
+.plan-day-name{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-light);margin-bottom:8px;font-weight:500}
+.plan-task{background:#fff;border:1px solid var(--border);border-radius:6px;padding:8px 10px;margin-bottom:6px;font-size:12px;cursor:pointer;transition:all .2s;display:flex;align-items:flex-start;gap:6px}
+.plan-task:hover{border-color:rgba(45,74,45,.3)}
+.plan-task.done{opacity:.5;text-decoration:line-through}
+.plan-task-check{width:14px;height:14px;border:1.5px solid var(--border);border-radius:3px;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:10px;transition:all .2s}
+.plan-task.done .plan-task-check{background:var(--moss);border-color:var(--moss);color:#fff}
+.plan-task-subject{font-weight:500;color:var(--moss);display:block;margin-bottom:2px}
+.plan-task-text{color:var(--ink-mid);line-height:1.4}
+.plan-task-time{font-size:11px;color:var(--ink-light);margin-top:3px;display:block}
+
+/* Settings */
+.settings-section{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:28px;margin-bottom:20px}
+.settings-section h3{font-family:var(--serif);font-size:20px;font-weight:600;margin-bottom:20px}
+.settings-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)}
+.settings-row:last-child{border-bottom:none}
+.settings-label{font-size:14px;color:var(--ink)}
+.settings-value{font-size:14px;color:var(--ink-light)}
+.settings-input{padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:var(--sans);outline:none;transition:border-color .2s;color:var(--ink);min-width:200px}
+.settings-input:focus{border-color:var(--moss)}
+.plan-badge{display:inline-block;background:var(--amber-faint);color:var(--amber);font-size:13px;padding:4px 12px;border-radius:100px;font-weight:500}
+.plan-badge.pro{background:var(--moss-faint);color:var(--moss)}
+.danger-btn{padding:8px 16px;border-radius:8px;font-size:13px;cursor:pointer;font-family:var(--sans);transition:all .2s;border:1px solid rgba(217,64,64,.3);background:var(--red-faint);color:var(--red)}
+.danger-btn:hover{background:#f7d5d5}
+.usage-bar{height:8px;background:var(--border);border-radius:4px;margin-top:8px}
+.usage-fill{height:100%;border-radius:4px;background:var(--moss);transition:width .5s}
+.usage-label{font-size:12px;color:var(--ink-light);margin-top:4px}
+
+/* Spinner / loading */
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+.spinner-dark{border-color:rgba(26,26,20,.15);border-top-color:var(--ink-mid)}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;right:24px;z-index:1000;background:var(--ink);color:#fff;padding:12px 20px;border-radius:10px;font-size:14px;font-weight:500;animation:slideUp .3s ease;box-shadow:0 8px 24px rgba(26,26,20,.3)}
+.toast.success{background:var(--moss)}
+.toast.error{background:var(--red)}
+
+/* Animations */
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* Responsive */
+@media(max-width:900px){
+  .hero-visual{display:none}
+  .tool-layout{grid-template-columns:1fr}
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .dash-grid{grid-template-columns:1fr}
+  .sidebar{width:64px}
+  .sidebar-logo,.sidebar-section,.user-info,.sidebar-item span,.sidebar-upgrade{display:none}
+  .sidebar-item{justify-content:center;padding:12px}
+  .plan-days{grid-template-columns:repeat(3,1fr)}
+  nav .nav-links{display:none}
+}
+@media(max-width:600px){
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .plan-days{grid-template-columns:repeat(2,1fr)}
+  .app-content{padding:16px}
+  .app-topbar{padding:0 16px}
+}
+</style>
+</head>
+<body>
+
+<!-- ── LANDING NAV ── -->
+<nav id="landingNav">
+  <a class="nav-logo" onclick="scrollToTop()">Lumin<span>a</span></a>
+  <ul class="nav-links">
+    <li><a onclick="scrollToSection('#features')">Features</a></li>
+    <li><a onclick="scrollToSection('#pricing')">Pricing</a></li>
+  </ul>
+  <div class="nav-actions">
+    <button class="btn-ghost" onclick="openAuth('login')">Sign In</button>
+    <button class="btn-nav" onclick="openAuth('signup')">Get Started</button>
+  </div>
+</nav>
+
+<!-- ── LANDING ── -->
+<div id="landing">
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-content">
+    <div class="hero-tag">Now powered by Claude AI</div>
+    <h1>Study <em>smarter,</em><br>not harder.</h1>
+    <p class="hero-sub">Upload your homework, notes, or textbooks. Lumina explains concepts, generates flashcards, and builds your personal study plan — in seconds.</p>
+    <div class="hero-actions">
+      <button class="btn-primary" onclick="openAuth('signup')">Start for free →</button>
+      <button class="btn-secondary" onclick="scrollToSection('#features')">See how it works</button>
+    </div>
+    <div class="hero-stats">
+      <div><span class="stat-num">2,400+</span><span class="stat-label">active students</span></div>
+      <div><span class="stat-num">98%</span><span class="stat-label">grade improvement</span></div>
+      <div><span class="stat-num">4.9★</span><span class="stat-label">average rating</span></div>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <div class="card-float">
+      <div class="card-float-label"><span class="ai-dot"></span>AI is explaining…</div>
+      <div class="card-float-text">Photosynthesis converts light energy into glucose via two stages: light-dependent reactions and the Calvin cycle…</div>
+      <span class="card-float-tag">Biology · Chapter 7</span>
+    </div>
+    <div class="card-float">
+      <div class="card-float-label">Flashcards generated</div>
+      <div class="flash-row"><span class="flash-chip">Mitochondria</span><span class="flash-chip">ATP synthesis</span><span class="flash-chip">Chlorophyll</span><span class="flash-chip">+ 14 more</span></div>
+    </div>
+    <div class="card-float">
+      <div class="card-float-label">Study plan · This week</div>
+      <div class="card-float-text" style="font-size:13px;line-height:1.9">Mon — Chapter review (45 min)<br>Wed — Flashcard drill (20 min)<br>Fri — Practice test (60 min)</div>
+    </div>
+  </div>
+</section>
+
+<!-- Logos -->
+<div class="logos">
+  <div class="logos-inner">
+    <p>Trusted by students at</p>
+    <span class="logo-item">Stanford</span><span class="logo-item">MIT</span><span class="logo-item">Oxford</span><span class="logo-item">Harvard</span><span class="logo-item">Yale</span><span class="logo-item">Berkeley</span>
+  </div>
+</div>
+
+<!-- Features -->
+<section class="land" id="features" style="background:var(--parchment)">
+  <div class="section-header">
+    <span class="section-tag">Everything you need</span>
+    <h2 class="land">Four tools.<br><em>Infinite possibilities.</em></h2>
+    <p class="section-sub">From last-minute cramming to long-term mastery, Lumina covers every study mode.</p>
+  </div>
+  <div class="features-grid">
+    <div class="feature-card"><div class="feature-icon">📄</div><h3>Homework Explainer</h3><p>Upload any assignment — PDF, image, or paste text. AI breaks down every concept into clear, digestible explanations.</p><span class="feature-badge">Most popular</span></div>
+    <div class="feature-card"><div class="feature-icon">🃏</div><h3>Flashcard Generator</h3><p>Paste your notes and get a full flashcard deck in seconds. Spaced repetition built in for maximum retention.</p></div>
+    <div class="feature-card"><div class="feature-icon">📝</div><h3>Notes Summarizer</h3><p>Dense lecture notes? Lumina distills them into bullet-point summaries and key takeaways you can actually study from.</p></div>
+    <div class="feature-card"><div class="feature-icon">📅</div><h3>Study Planner</h3><p>Tell Lumina your exam dates. It builds a personalised daily study schedule, adjusting as deadlines approach.</p></div>
+  </div>
+</section>
+
+<!-- Pricing -->
+<section class="land" id="pricing" style="background:var(--parchment)">
+  <div class="section-header">
+    <span class="section-tag">Pricing</span>
+    <h2 class="land">Simple, honest <em>pricing.</em></h2>
+    <p class="section-sub">Start free. Upgrade when you're ready. No hidden fees.</p>
+  </div>
+  <div class="pricing-grid">
+    <div class="pricing-card">
+      <p class="pricing-name">Free</p><p class="pricing-price">$0</p><p class="pricing-per">forever</p>
+      <hr class="pricing-divider"/>
+      <ul class="pricing-features">
+        <li><span class="check">✓</span>5 AI explanations/month</li>
+        <li><span class="check">✓</span>1 flashcard deck</li>
+        <li><span class="check">✓</span>Basic note summary</li>
+        <li><span class="check">✓</span>1 study plan</li>
+      </ul>
+      <button class="pricing-cta" style="background:var(--parchment);color:var(--moss);border:1px solid var(--border)" onclick="openAuth('signup','free')">Get Started Free</button>
+    </div>
+    <div class="pricing-card featured">
+      <div class="pricing-tag">Most popular</div>
+      <p class="pricing-name">Scholar</p><p class="pricing-price">$7</p><p class="pricing-per">per month</p>
+      <hr class="pricing-divider"/>
+      <ul class="pricing-features">
+        <li><span class="check">✓</span>Unlimited AI explanations</li>
+        <li><span class="check">✓</span>Unlimited flashcard decks</li>
+        <li><span class="check">✓</span>Advanced note summaries</li>
+        <li><span class="check">✓</span>Adaptive study planner</li>
+        <li><span class="check">✓</span>PDF &amp; image upload</li>
+        <li><span class="check">✓</span>Progress analytics</li>
+      </ul>
+      <button class="pricing-cta" onclick="openAuth('signup','scholar')">Start 7-day Free Trial</button>
+    </div>
+    <div class="pricing-card">
+      <p class="pricing-name">Pro</p><p class="pricing-price">$10</p><p class="pricing-per">per month</p>
+      <hr class="pricing-divider"/>
+      <ul class="pricing-features">
+        <li><span class="check">✓</span>Everything in Scholar</li>
+        <li><span class="check">✓</span>Priority AI responses</li>
+        <li><span class="check">✓</span>Group study rooms</li>
+        <li><span class="check">✓</span>Export to Anki / Notion</li>
+        <li><span class="check">✓</span>24/7 priority support</li>
+      </ul>
+      <button class="pricing-cta" onclick="openAuth('signup','pro')">Start 7-day Free Trial</button>
+    </div>
+  </div>
+</section>
+
+<!-- Testimonials -->
+<section class="land">
+  <div class="section-header">
+    <span class="section-tag">Student stories</span>
+    <h2 class="land">Real results.<br><em>Real students.</em></h2>
+  </div>
+  <div class="testimonials-grid">
+    <div class="testimonial"><div class="testimonial-stars">★★★★★</div><p class="testimonial-text">"I went from a C+ to an A in Organic Chemistry in one semester. The flashcard generator + explanations are genuinely unmatched."</p><div class="testimonial-author"><div class="author-avatar">JL</div><div><div class="author-name">Jessica L.</div><div class="author-meta">Pre-med · UCLA</div></div></div></div>
+    <div class="testimonial"><div class="testimonial-stars">★★★★★</div><p class="testimonial-text">"As an international student, having complex English texts explained clearly in seconds changed everything. I use it every single day."</p><div class="testimonial-author"><div class="author-avatar">KS</div><div><div class="author-name">Kenji S.</div><div class="author-meta">Computer Science · MIT</div></div></div></div>
+    <div class="testimonial"><div class="testimonial-stars">★★★★★</div><p class="testimonial-text">"The study planner is ridiculously good. It knew I had finals week coming and automatically scaled back my daily load beforehand."</p><div class="testimonial-author"><div class="author-avatar">AM</div><div><div class="author-name">Amara M.</div><div class="author-meta">Law · Oxford</div></div></div></div>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-banner">
+  <span class="section-tag" style="color:#a8c8a8">Start today</span>
+  <h2>Your best semester<br><em>starts here.</em></h2>
+  <p>Join 2,400+ students already studying smarter with Lumina.</p>
+  <button class="btn-primary" style="margin:0 auto;font-size:16px;padding:16px 36px" onclick="openAuth('signup')">Start your free trial →</button>
+  <p class="cta-note">No credit card required · Cancel anytime · 7-day free trial</p>
+</div>
+
+<!-- Footer -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand"><a class="nav-logo" style="color:#a8c8a8;font-size:26px;display:block">Lumin<span>a</span></a><p>AI-powered study tools for ambitious students everywhere.</p></div>
+    <div class="footer-links"><h4>Product</h4><ul><li><a>Features</a></li><li><a>Pricing</a></li><li><a>Changelog</a></li></ul></div>
+    <div class="footer-links"><h4>Company</h4><ul><li><a>About</a></li><li><a>Blog</a></li><li><a>Careers</a></li></ul></div>
+    <div class="footer-links"><h4>Legal</h4><ul><li><a>Privacy</a></li><li><a>Terms</a></li></ul></div>
+  </div>
+  <div class="footer-bottom"><p>© 2025 Lumina AI Inc.</p><p>Powered by Claude</p></div>
+</footer>
+</div><!-- /landing -->
+
+<!-- ── AUTH MODAL ── -->
+<div id="authModal" class="modal-overlay" style="display:none" onclick="closeAuthOnBg(event)">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeAuth()">✕</button>
+    <div class="modal-logo">Lumin<span>a</span></div>
+    <p class="modal-sub" id="authSubtitle">Welcome back — let's get studying.</p>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tabLogin" onclick="switchAuthTab('login')">Sign In</button>
+      <button class="auth-tab" id="tabSignup" onclick="switchAuthTab('signup')">Create Account</button>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <div id="loginForm">
+      <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="loginEmail" type="email" placeholder="you@university.edu"/></div>
+      <div class="form-group"><label class="form-label">Password</label><input class="form-input" id="loginPassword" type="password" placeholder="Your password"/></div>
+      <p class="form-error" id="loginError">Invalid email or password.</p>
+      <button class="auth-btn" id="loginBtn" onclick="doLogin()">Sign In</button>
+      <div class="auth-divider">or</div>
+      <button class="demo-login-btn" onclick="demoLogin()">✦ Continue as Demo Student</button>
+    </div>
+
+    <!-- SIGNUP FORM -->
+    <div id="signupForm" style="display:none">
+      <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" id="signupName" type="text" placeholder="Alex Johnson"/></div>
+      <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="signupEmail" type="email" placeholder="you@university.edu"/></div>
+      <div class="form-group"><label class="form-label">Password</label><input class="form-input" id="signupPassword" type="password" placeholder="Create a password"/></div>
+      <div class="form-group">
+        <label class="form-label">Choose your plan</label>
+        <div class="plan-grid">
+          <label class="plan-option selected" id="planFree"><input type="radio" name="plan" value="free" checked/><div class="plan-name">Free</div><div class="plan-price">$0/mo</div></label>
+          <label class="plan-option" id="planScholar"><input type="radio" name="plan" value="scholar"/><div class="plan-name">Scholar</div><div class="plan-price">$7/mo</div></label>
+          <label class="plan-option" id="planPro"><input type="radio" name="plan" value="pro"/><div class="plan-name">Pro</div><div class="plan-price">$10/mo</div></label>
+        </div>
+      </div>
+      <p class="form-error" id="signupError">Please fill in all fields.</p>
+      <button class="auth-btn" id="signupBtn" onclick="doSignup()">Create Account</button>
+      <div class="auth-divider">or</div>
+      <button class="demo-login-btn" onclick="demoLogin()">✦ Continue as Demo Student</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── APP SHELL ── -->
+<div id="appShell">
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">Lumin<span>a</span></div>
+      <span class="sidebar-section">Study Tools</span>
+      <button class="sidebar-item active" id="nav-dashboard" onclick="navigate('dashboard')"><span class="sidebar-item-icon">◈</span><span>Dashboard</span></button>
+      <button class="sidebar-item" id="nav-explain" onclick="navigate('explain')"><span class="sidebar-item-icon">📄</span><span>Explain</span></button>
+      <button class="sidebar-item" id="nav-flashcards" onclick="navigate('flashcards')"><span class="sidebar-item-icon">🃏</span><span>Flashcards</span></button>
+      <button class="sidebar-item" id="nav-summarize" onclick="navigate('summarize')"><span class="sidebar-item-icon">📝</span><span>Summarize</span></button>
+      <button class="sidebar-item" id="nav-planner" onclick="navigate('planner')"><span class="sidebar-item-icon">📅</span><span>Study Planner</span></button>
+      <span class="sidebar-section">Account</span>
+      <button class="sidebar-item" id="nav-settings" onclick="navigate('settings')"><span class="sidebar-item-icon">⚙</span><span>Settings</span></button>
+      <div class="sidebar-bottom">
+        <div class="sidebar-upgrade" id="upgradePrompt">
+          <p>Unlock unlimited AI access</p>
+          <button class="upgrade-btn" onclick="navigate('settings')">Upgrade to Scholar →</button>
+        </div>
+        <button class="sidebar-user" onclick="navigate('settings')">
+          <div class="user-avatar" id="sidebarAvatar">A</div>
+          <div class="user-info"><div class="user-name-small" id="sidebarName">Student</div><div class="user-plan-small" id="sidebarPlan">Free plan</div></div>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="app-main">
+      <div class="app-topbar">
+        <div class="topbar-title" id="topbarTitle">Dashboard</div>
+        <div class="topbar-right">
+          <button class="topbar-btn" id="topbarAction" style="display:none"></button>
+          <button class="topbar-btn" onclick="doLogout()">Sign Out</button>
+        </div>
+      </div>
+      <div class="app-content">
+
+        <!-- DASHBOARD -->
+        <div class="view active" id="view-dashboard">
+          <div class="dash-welcome"><h2 id="dashWelcome">Good morning!</h2><p>Here's your study overview for today.</p></div>
+          <div class="stats-grid">
+            <div class="stat-card"><div class="stat-card-label">Explanations</div><div class="stat-card-num" id="statExplain">0</div><div class="stat-card-change">total sessions</div></div>
+            <div class="stat-card"><div class="stat-card-label">Flashcard Decks</div><div class="stat-card-num" id="statDecks">0</div><div class="stat-card-change">saved decks</div></div>
+            <div class="stat-card"><div class="stat-card-label">Cards Studied</div><div class="stat-card-num" id="statCards">0</div><div class="stat-card-change">all time</div></div>
+            <div class="stat-card"><div class="stat-card-label">Summaries</div><div class="stat-card-num" id="statSummaries">0</div><div class="stat-card-change">created</div></div>
+          </div>
+          <div class="dash-grid">
+            <div class="dash-card">
+              <h3>Quick Actions</h3>
+              <div class="quick-actions">
+                <button class="quick-action" onclick="navigate('explain')"><span class="qa-icon">📄</span><span class="qa-label">Explain Homework</span><span class="qa-sub">Upload or paste text</span></button>
+                <button class="quick-action" onclick="navigate('flashcards')"><span class="qa-icon">🃏</span><span class="qa-label">Make Flashcards</span><span class="qa-sub">From your notes</span></button>
+                <button class="quick-action" onclick="navigate('summarize')"><span class="qa-icon">📝</span><span class="qa-label">Summarize Notes</span><span class="qa-sub">Get key points fast</span></button>
+                <button class="quick-action" onclick="navigate('planner')"><span class="qa-icon">📅</span><span class="qa-label">Build Study Plan</span><span class="qa-sub">For your exams</span></button>
+              </div>
+            </div>
+            <div class="dash-card">
+              <h3>Recent Activity</h3>
+              <div class="activity-list" id="activityList"><div class="activity-empty">No activity yet — start studying!</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- EXPLAIN -->
+        <div class="view" id="view-explain">
+          <div class="tool-layout">
+            <div class="tool-input-card">
+              <div class="tool-section-label">Upload or paste content</div>
+              <div class="dropzone" id="explainDropzone">
+                <input type="file" id="explainFileInput" accept=".txt,.md,image/*,.pdf" onchange="handleExplainFile(event)"/>
+                <div class="dz-icon">📎</div>
+                <div class="dz-text"><strong>Click to upload</strong> or drag & drop</div>
+                <div class="dz-hint">Supports images, .txt, .md · 10MB max</div>
+                <div id="explainFileBadge" style="display:none"></div>
+              </div>
+              <div class="tool-section-label" style="margin-top:4px">Or type / paste your content</div>
+              <textarea class="tool-textarea" id="explainInput" placeholder="Paste your homework question, a paragraph from your textbook, or describe a concept you want explained…" rows="6"></textarea>
+              <div style="display:flex;gap:10px;align-items:center;margin-top:12px">
+                <select class="form-input" id="explainLevel" style="width:auto;padding:8px 12px;font-size:13px">
+                  <option value="beginner">Explain simply</option>
+                  <option value="high-school" selected>High school level</option>
+                  <option value="university">University level</option>
+                  <option value="expert">Expert / technical</option>
+                </select>
+              </div>
+              <button class="tool-run-btn" id="explainBtn" onclick="runExplain()">
+                <span>Explain with Lumina</span> <span>→</span>
+              </button>
+            </div>
+            <div class="tool-output-card">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+                <div class="tool-section-label" style="margin:0">AI Explanation</div>
+                <button class="copy-btn" id="explainCopyBtn" style="display:none" onclick="copyOutput('explainOutput')">⎘ Copy</button>
+              </div>
+              <div class="tool-output-area" id="explainOutput">
+                <div class="output-placeholder"><span class="output-placeholder-icon">📄</span>Your AI explanation will appear here.<br><span style="font-size:13px">Upload a file or paste your content and hit Explain.</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- FLASHCARDS -->
+        <div class="view" id="view-flashcards">
+          <div id="fcCreateView">
+            <div class="fc-create-section">
+              <h3>Generate New Deck</h3>
+              <input class="deck-name-input" id="deckNameInput" placeholder="Deck name (e.g. Biology Chapter 5)" maxlength="60"/>
+              <textarea class="tool-textarea" id="fcInput" placeholder="Paste your notes, textbook excerpt, or any content to turn into flashcards…" rows="5"></textarea>
+              <button class="tool-run-btn" id="fcGenerateBtn" onclick="runFlashcards()"><span>Generate Flashcards</span> <span>→</span></button>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+              <h3 style="font-family:var(--serif);font-size:22px;font-weight:600">My Decks</h3>
+              <span id="deckCount" style="font-size:14px;color:var(--ink-light)"></span>
+            </div>
+            <div id="deckList"></div>
+          </div>
+          <div id="fcStudyView" style="display:none">
+            <div class="study-mode">
+              <div class="study-header">
+                <button class="study-back" onclick="exitStudyMode()">← Back to decks</button>
+                <div class="study-progress-wrap">
+                  <div class="study-progress-bar"><div class="study-progress-fill" id="studyProgressFill" style="width:0%"></div></div>
+                  <div class="study-counter" id="studyCounter">Card 1 of 10</div>
+                </div>
+              </div>
+              <div id="studyDeckName" style="font-family:var(--serif);font-size:16px;color:var(--ink-light);text-align:center;margin-bottom:20px"></div>
+              <div class="flashcard-3d" id="studyCard" onclick="flipStudyCard()">
+                <div class="flashcard-inner" id="studyCardInner">
+                  <div class="flashcard-face">
+                    <div class="fc-face-label">Question</div>
+                    <div class="fc-face-text" id="studyQuestion"></div>
+                    <div class="fc-hint">Tap to reveal answer</div>
+                  </div>
+                  <div class="flashcard-face back">
+                    <div class="fc-face-label" style="color:var(--moss)">Answer</div>
+                    <div class="fc-face-text" id="studyAnswer" style="color:var(--moss-light)"></div>
+                  </div>
+                </div>
+              </div>
+              <div id="studyBtnsFlip" style="display:flex;justify-content:center">
+                <button class="study-btn flip" onclick="event.stopPropagation();flipStudyCard()">Flip card ↕</button>
+              </div>
+              <div id="studyBtnsRate" style="display:none">
+                <div class="study-actions">
+                  <button class="study-btn miss" onclick="event.stopPropagation();rateCard(false)">✗ Review again</button>
+                  <button class="study-btn know" onclick="event.stopPropagation();rateCard(true)">✓ Got it!</button>
+                </div>
+              </div>
+              <div id="studyComplete" class="study-complete" style="display:none">
+                <div class="study-complete-icon">🎉</div>
+                <h3>Session Complete!</h3>
+                <p id="studyCompleteMsg">Great work on this deck.</p>
+                <div class="score-row">
+                  <div class="score-item good"><div class="score-num" id="scoreKnew">0</div><div class="score-label">Knew it</div></div>
+                  <div class="score-item bad"><div class="score-num" id="scoreReview">0</div><div class="score-label">Review again</div></div>
+                </div>
+                <button class="btn-primary" onclick="restartStudy()">Study Again</button>
+                <button class="btn-secondary" style="margin-left:10px" onclick="exitStudyMode()">Back to Decks</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SUMMARIZE -->
+        <div class="view" id="view-summarize">
+          <div class="tool-layout">
+            <div class="tool-input-card">
+              <div class="tool-section-label">Paste your notes</div>
+              <textarea class="tool-textarea" id="summarizeInput" placeholder="Paste your lecture notes, textbook chapter, article, or any long-form content here…" rows="10"></textarea>
+              <div style="display:flex;gap:10px;align-items:center;margin-top:12px;flex-wrap:wrap">
+                <select class="form-input" id="summaryStyle" style="width:auto;padding:8px 12px;font-size:13px">
+                  <option value="bullets">Bullet points</option>
+                  <option value="outline">Structured outline</option>
+                  <option value="brief">Ultra-brief (3 sentences)</option>
+                </select>
+              </div>
+              <button class="tool-run-btn" id="summarizeBtn" onclick="runSummarize()"><span>Summarize with Lumina</span> <span>→</span></button>
+            </div>
+            <div class="tool-output-card">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+                <div class="tool-section-label" style="margin:0">Summary</div>
+                <button class="copy-btn" id="summarizeCopyBtn" style="display:none" onclick="copyOutput('summaryContent')">⎘ Copy</button>
+              </div>
+              <div id="summarizeOutput">
+                <div class="output-placeholder"><span class="output-placeholder-icon">📝</span>Your summary will appear here.<br><span style="font-size:13px">Paste your notes and hit Summarize.</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PLANNER -->
+        <div class="view" id="view-planner">
+          <div class="planner-form">
+            <h3>Build Your Study Plan</h3>
+            <div class="tool-section-label">Your subjects & exam dates</div>
+            <div id="subjectList" class="subject-list">
+              <div class="subject-row">
+                <input class="subject-input" placeholder="Subject (e.g. Organic Chemistry)" />
+                <input class="date-input" type="date" />
+                <button class="subject-remove" onclick="removeSubject(this)">×</button>
+              </div>
+            </div>
+            <button class="add-subject-btn" onclick="addSubject()">+ Add another subject</button>
+            <div style="margin-top:20px;display:flex;gap:12px;align-items:center">
+              <div>
+                <label class="form-label" style="display:block;margin-bottom:6px">Study hours per day</label>
+                <select class="form-input" id="hoursPerDay" style="width:auto;padding:8px 12px;font-size:13px">
+                  <option value="1">1 hour</option><option value="2" selected>2 hours</option><option value="3">3 hours</option><option value="4">4+ hours</option>
+                </select>
+              </div>
+            </div>
+            <button class="tool-run-btn" id="plannerBtn" style="max-width:300px;margin-top:20px" onclick="runPlanner()"><span>Generate Study Plan</span> <span>→</span></button>
+          </div>
+          <div id="plannerOutput"></div>
+        </div>
+
+        <!-- SETTINGS -->
+        <div class="view" id="view-settings">
+          <div class="settings-section">
+            <h3>Profile</h3>
+            <div class="settings-row"><span class="settings-label">Name</span><input class="settings-input" id="settingsName" placeholder="Your name"/></div>
+            <div class="settings-row"><span class="settings-label">Email</span><input class="settings-input" id="settingsEmail" placeholder="your@email.com"/></div>
+            <div class="settings-row"><span class="settings-label">&nbsp;</span><button class="topbar-btn primary" onclick="saveProfile()" style="padding:8px 20px">Save changes</button></div>
+          </div>
+          <div class="settings-section">
+            <h3>Subscription</h3>
+            <div class="settings-row"><span class="settings-label">Current plan</span><span class="plan-badge" id="currentPlanBadge">Free</span></div>
+            <div class="settings-row"><span class="settings-label">Member since</span><span class="settings-value" id="memberSince">—</span></div>
+            <div class="settings-row">
+              <span class="settings-label">Upgrade your plan</span>
+              <div style="display:flex;gap:8px">
+                <button class="topbar-btn" onclick="upgradePlan('scholar')">Scholar — $7/mo</button>
+                <button class="topbar-btn primary" onclick="upgradePlan('pro')">Pro — $10/mo</button>
+              </div>
+            </div>
+          </div>
+          <div class="settings-section">
+            <h3>Usage This Month</h3>
+            <div class="settings-row"><span class="settings-label">AI Explanations</span><span class="settings-value" id="usageExplain">0</span></div>
+            <div class="settings-row"><span class="settings-label">Summaries generated</span><span class="settings-value" id="usageSummaries">0</span></div>
+            <div class="settings-row"><span class="settings-label">Flashcard decks</span><span class="settings-value" id="usageDecks">0</span></div>
+          </div>
+          <div class="settings-section">
+            <h3>Danger Zone</h3>
+            <div class="settings-row"><span class="settings-label">Clear all saved data</span><button class="danger-btn" onclick="clearAllData()">Clear data</button></div>
+            <div class="settings-row"><span class="settings-label">Sign out</span><button class="danger-btn" onclick="doLogout()">Sign out</button></div>
+          </div>
+        </div>
+
+      </div><!-- /app-content -->
+    </main>
+  </div>
+</div><!-- /appShell -->
+
+<script>
+// ───────────────────────────────────────────────
+// STORAGE
+// ───────────────────────────────────────────────
+const DB = {
+  get:(k)=>{try{return JSON.parse(localStorage.getItem('lumina_'+k))}catch{return null}},
+  set:(k,v)=>localStorage.setItem('lumina_'+k,JSON.stringify(v)),
+  del:(k)=>localStorage.removeItem('lumina_'+k)
+};
+
+// ───────────────────────────────────────────────
+// CLAUDE API  (proxied through /api/claude so key stays server-side)
+// ───────────────────────────────────────────────
+async function callClaude(messages, maxTokens=1200){
+  const res = await fetch('/api/claude',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({messages, max_tokens:maxTokens})
+  });
+  const data = await res.json();
+  if(data.error) throw new Error(data.error.message || data.error);
+  return data.content.map(b=>b.text||'').join('');
+}
+
+// ───────────────────────────────────────────────
+// AUTH
+// ───────────────────────────────────────────────
+function openAuth(tab='login', plan=null){
+  document.getElementById('authModal').style.display='flex';
+  switchAuthTab(tab);
+  if(plan) selectPlan(plan);
+}
+function closeAuth(){ document.getElementById('authModal').style.display='none'; }
+function closeAuthOnBg(e){ if(e.target===document.getElementById('authModal')) closeAuth(); }
+function switchAuthTab(tab){
+  const isLogin = tab==='login';
+  document.getElementById('loginForm').style.display = isLogin ? 'block' : 'none';
+  document.getElementById('signupForm').style.display = isLogin ? 'none' : 'block';
+  document.getElementById('tabLogin').classList.toggle('active', isLogin);
+  document.getElementById('tabSignup').classList.toggle('active', !isLogin);
+  document.getElementById('authSubtitle').textContent = isLogin ? "Welcome back — let's get studying." : "Join 2,400+ students today.";
+}
+function selectPlan(p){
+  ['free','scholar','pro'].forEach(n=>{
+    const el = document.getElementById('plan'+n.charAt(0).toUpperCase()+n.slice(1));
+    if(el) el.classList.toggle('selected', n===p);
+  });
+}
+function getSelectedPlan(){
+  const checked = document.querySelector('input[name="plan"]:checked');
+  return checked ? checked.value : 'free';
+}
+['planFree','planScholar','planPro'].forEach(id=>{
+  const el = document.getElementById(id);
+  if(el) el.addEventListener('click',()=>{
+    ['planFree','planScholar','planPro'].forEach(i=>document.getElementById(i).classList.remove('selected'));
+    el.classList.add('selected');
+    el.querySelector('input').checked=true;
+  });
+});
+function doLogin(){
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass = document.getElementById('loginPassword').value;
+  const users = DB.get('users') || {};
+  const user = users[email];
+  if(!user || user.password !== pass){
+    document.getElementById('loginError').style.display='block'; return;
+  }
+  document.getElementById('loginError').style.display='none';
+  DB.set('currentUser', email);
+  closeAuth(); launchApp();
+}
+function doSignup(){
+  const name = document.getElementById('signupName').value.trim();
+  const email = document.getElementById('signupEmail').value.trim();
+  const pass = document.getElementById('signupPassword').value;
+  if(!name||!email||!pass){ document.getElementById('signupError').style.display='block'; return; }
+  document.getElementById('signupError').style.display='none';
+  const users = DB.get('users') || {};
+  const plan = getSelectedPlan();
+  users[email] = {name,email,password:pass,plan,joined:new Date().toLocaleDateString('en-US',{month:'long',year:'numeric'}),stats:{explain:0,decks:0,cards:0,summaries:0}};
+  DB.set('users', users);
+  DB.set('currentUser', email);
+  closeAuth(); launchApp();
+}
+function demoLogin(){
+  const users = DB.get('users') || {};
+  const email = 'demo@lumina.ai';
+  if(!users[email]) users[email]={name:'Demo Student',email,password:'demo',plan:'scholar',joined:'March 2025',stats:{explain:3,decks:2,cards:18,summaries:2}};
+  DB.set('users', users);
+  DB.set('currentUser', email);
+  const demoDecks = DB.get('decks_'+email);
+  if(!demoDecks || demoDecks.length===0){
+    DB.set('decks_'+email,[{id:'d1',name:'Biology: Cell Structure',created:'Mar 10',cards:[{q:'What is the powerhouse of the cell?',a:'The mitochondria — produces ATP via cellular respiration.',level:2},{q:'What does the nucleus do?',a:'Contains DNA and controls cell activity and protein synthesis.',level:1},{q:'What is the function of the cell membrane?',a:'Controls what enters and exits the cell (selective permeability).',level:0},{q:'Define osmosis',a:'Movement of water molecules from high to low concentration across a semi-permeable membrane.',level:1}],studied:14},{id:'d2',name:'Physics: Newton\'s Laws',created:'Mar 12',cards:[{q:'State Newton\'s First Law',a:'An object in motion stays in motion unless acted on by an external force (inertia).',level:1},{q:'State Newton\'s Second Law',a:'F = ma — Force equals mass times acceleration.',level:2},{q:'State Newton\'s Third Law',a:'For every action there is an equal and opposite reaction.',level:1}],studied:4}]);
+    DB.set('activity_'+email,[{icon:'🃏',title:'Generated "Biology: Cell Structure" deck',time:'2 days ago'},{icon:'📄',title:'Explained photosynthesis concepts',time:'3 days ago'},{icon:'📝',title:'Summarized lecture notes on Newton\'s Laws',time:'4 days ago'}]);
+  }
+  closeAuth(); launchApp();
+}
+function doLogout(){
+  DB.del('currentUser');
+  document.getElementById('appShell').style.display='none';
+  document.getElementById('landing').style.display='block';
+  document.getElementById('landingNav').style.display='flex';
+  showToast('Signed out successfully');
+}
+
+// ───────────────────────────────────────────────
+// APP LAUNCH & NAVIGATION
+// ───────────────────────────────────────────────
+function launchApp(){
+  document.getElementById('landing').style.display='none';
+  document.getElementById('landingNav').style.display='none';
+  document.getElementById('appShell').style.display='block';
+  loadUserUI();
+  navigate('dashboard');
+}
+function loadUserUI(){
+  const email = DB.get('currentUser');
+  const users = DB.get('users') || {};
+  const user = users[email];
+  if(!user) return;
+  const initials = user.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+  document.getElementById('sidebarAvatar').textContent = initials;
+  document.getElementById('sidebarName').textContent = user.name;
+  document.getElementById('sidebarPlan').textContent = user.plan + ' plan';
+  document.getElementById('upgradePrompt').style.display = user.plan==='free' ? 'block' : 'none';
+  // settings
+  document.getElementById('settingsName').value = user.name;
+  document.getElementById('settingsEmail').value = user.email;
+  document.getElementById('memberSince').textContent = user.joined || '—';
+  const pb = document.getElementById('currentPlanBadge');
+  pb.textContent = user.plan.charAt(0).toUpperCase()+user.plan.slice(1);
+  pb.className = 'plan-badge' + (user.plan!=='free' ? ' pro' : '');
+}
+function navigate(view){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.sidebar-item').forEach(i=>i.classList.remove('active'));
+  document.getElementById('view-'+view).classList.add('active');
+  const navBtn = document.getElementById('nav-'+view);
+  if(navBtn) navBtn.classList.add('active');
+  const titles = {dashboard:'Dashboard',explain:'Homework Explainer',flashcards:'Flashcards',summarize:'Notes Summarizer',planner:'Study Planner',settings:'Settings'};
+  document.getElementById('topbarTitle').textContent = titles[view] || view;
+  document.getElementById('topbarAction').style.display = 'none';
+  if(view==='dashboard') loadDashboard();
+  if(view==='flashcards') loadDecks();
+  if(view==='settings') loadSettings();
+}
+
+// ───────────────────────────────────────────────
+// DASHBOARD
+// ───────────────────────────────────────────────
+function loadDashboard(){
+  const email = DB.get('currentUser');
+  const users = DB.get('users') || {};
+  const user = users[email];
+  if(!user) return;
+  const hour = new Date().getHours();
+  document.getElementById('dashWelcome').textContent = (hour<12?'Good morning':hour<17?'Good afternoon':'Good evening') + ', ' + user.name.split(' ')[0] + '!';
+  const s = user.stats || {};
+  document.getElementById('statExplain').textContent = s.explain||0;
+  document.getElementById('statDecks').textContent = (DB.get('decks_'+email)||[]).length;
+  document.getElementById('statCards').textContent = s.cards||0;
+  document.getElementById('statSummaries').textContent = s.summaries||0;
+  const activity = DB.get('activity_'+email) || [];
+  const list = document.getElementById('activityList');
+  if(!activity.length){ list.innerHTML='<div class="activity-empty">No activity yet — start studying!</div>'; return; }
+  list.innerHTML = activity.slice(0,5).map(a=>`<div class="activity-item"><div class="activity-icon">${a.icon}</div><div class="activity-text"><div class="activity-title">${a.title}</div><div class="activity-time">${a.time}</div></div></div>`).join('');
+}
+function addActivity(icon, title){
+  const email = DB.get('currentUser');
+  const activity = DB.get('activity_'+email) || [];
+  activity.unshift({icon,title,time:'Just now'});
+  DB.set('activity_'+email, activity.slice(0,20));
+}
+function incStat(key){
+  const email = DB.get('currentUser');
+  const users = DB.get('users') || {};
+  if(!users[email]) return;
+  if(!users[email].stats) users[email].stats = {};
+  users[email].stats[key] = (users[email].stats[key]||0)+1;
+  DB.set('users', users);
+}
+
+// ───────────────────────────────────────────────
+// EXPLAIN TOOL
+// ───────────────────────────────────────────────
+let explainFileData = null;
+let explainFileType = null;
+
+function handleExplainFile(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  const badge = document.getElementById('explainFileBadge');
+  badge.style.display='block';
+  badge.innerHTML=`<span class="file-badge">📎 ${file.name} <button class="file-remove" onclick="clearExplainFile()">×</button></span>`;
+  const reader = new FileReader();
+  if(file.type.startsWith('image/')){
+    explainFileType = file.type;
+    reader.onload = e => { explainFileData = e.target.result.split(',')[1]; };
+    reader.readAsDataURL(file);
+  } else {
+    explainFileType = 'text';
+    reader.onload = e => { explainFileData = e.target.result; document.getElementById('explainInput').value = explainFileData; };
+    reader.readAsText(file);
+  }
+}
+function clearExplainFile(){
+  explainFileData = null; explainFileType = null;
+  document.getElementById('explainFileBadge').style.display='none';
+  document.getElementById('explainFileInput').value='';
+}
+async function runExplain(){
+  const text = document.getElementById('explainInput').value.trim();
+  const level = document.getElementById('explainLevel').value;
+  if(!text && !explainFileData){ showToast('Please enter some content first','error'); return; }
+  const btn = document.getElementById('explainBtn');
+  const out = document.getElementById('explainOutput');
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Explaining…';
+  out.innerHTML='<div class="output-placeholder"><span class="output-placeholder-icon">⏳</span>Lumina is reading and explaining…</div>';
+
+  const levelMap = {beginner:'a 12-year-old','high-school':'a high school student',university:'a university student',expert:'a graduate-level expert'};
+  const systemPrompt = `You are Lumina, an expert AI study assistant. Explain the content clearly for ${levelMap[level]}. Use: 1) A brief one-sentence context intro 2) Key concepts with clear explanations, analogies where helpful 3) A concise summary at the end. Use **bold** for key terms. Keep under 300 words.`;
+  
+  let messages;
+  if(explainFileData && explainFileType !== 'text'){
+    messages=[{role:'user',content:[{type:'image',source:{type:'base64',media_type:explainFileType,data:explainFileData}},{type:'text',text:systemPrompt+(text?'\n\nAdditional context: '+text:'')}]}];
+  } else {
+    messages=[{role:'user',content:`${systemPrompt}\n\nContent to explain:\n${text}`}];
+  }
+  try {
+    const result = await callClaude(messages);
+    out.innerHTML = formatAIText(result);
+    document.getElementById('explainCopyBtn').style.display='inline-flex';
+    incStat('explain');
+    const actLabel = text ? '"' + text.slice(0,40) + (text.length>40?'…':'') + '"' : 'an uploaded image';
+    addActivity('📄', 'Explained: ' + actLabel);
+  } catch(e){
+    out.innerHTML='<div class="output-placeholder"><span class="output-placeholder-icon">⚠️</span>Something went wrong. Please try again.</div>';
+  }
+  btn.disabled=false; btn.innerHTML='<span>Explain with Lumina</span> <span>→</span>';
+}
+
+// ───────────────────────────────────────────────
+// FLASHCARDS TOOL
+// ───────────────────────────────────────────────
+let studyDeck = null, studyDeckIndex = 0, studyIndex = 0, studyKnew = 0, studyMissed = 0, studyFlipped = false;
+
+function loadDecks(){
+  const email = DB.get('currentUser');
+  const decks = DB.get('decks_'+email) || [];
+  const list = document.getElementById('deckList');
+  document.getElementById('deckCount').textContent = decks.length + ' deck' + (decks.length!==1?'s':'');
+  if(!decks.length){
+    list.innerHTML=`<div class="empty-state"><span class="empty-icon">🃏</span><div class="empty-title">No decks yet</div><p class="empty-sub">Paste your notes above to generate your first flashcard deck.</p></div>`;
+    return;
+  }
+  list.innerHTML = decks.map((d,i)=>{
+    const pct = d.cards.length ? Math.round(d.cards.filter(c=>c.level>=2).length/d.cards.length*100) : 0;
+    return `<div class="deck-item">
+      <div class="deck-info">
+        <h4>${d.name}</h4>
+        <div class="deck-meta">${d.cards.length} cards · Created ${d.created}</div>
+        <div class="deck-progress"><div class="deck-progress-fill" style="width:${pct}%"></div></div>
+      </div>
+      <div class="deck-actions">
+        <button class="deck-btn study" onclick="startStudy(${i})">Study →</button>
+        <button class="deck-btn danger" onclick="deleteDeck(${i})">Delete</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+async function runFlashcards(){
+  const text = document.getElementById('fcInput').value.trim();
+  const name = document.getElementById('deckNameInput').value.trim() || 'Untitled Deck';
+  if(!text){ showToast('Please paste some content first','error'); return; }
+  const btn = document.getElementById('fcGenerateBtn');
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Generating cards…';
+  try {
+    const prompt = `Generate exactly 8 high-quality flashcards from the following content. Return ONLY a raw JSON array — no markdown, no backticks, no preamble. Each object must have "q" (question, concise) and "a" (answer, clear and complete, 1-2 sentences max).\n\nContent:\n${text}`;
+    const result = await callClaude([{role:'user',content:prompt}]);
+    const clean = result.replace(/```json|```/g,'').trim();
+    const cards = JSON.parse(clean).map(c=>({...c,level:0}));
+    const email = DB.get('currentUser');
+    const decks = DB.get('decks_'+email) || [];
+    const deck = {id:'d'+Date.now(),name,created:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'}),cards,studied:0};
+    decks.unshift(deck);
+    DB.set('decks_'+email, decks);
+    incStat('decks');
+    addActivity('🃏', `Generated "${name}" — ${cards.length} cards`);
+    document.getElementById('deckNameInput').value='';
+    document.getElementById('fcInput').value='';
+    loadDecks();
+    showToast(`✓ Created "${name}" with ${cards.length} cards`,'success');
+  } catch(e){
+    showToast('Could not parse flashcards. Try clearer content.','error');
+  }
+  btn.disabled=false; btn.innerHTML='<span>Generate Flashcards</span> <span>→</span>';
+}
+function deleteDeck(i){
+  const email = DB.get('currentUser');
+  const decks = DB.get('decks_'+email) || [];
+  decks.splice(i,1);
+  DB.set('decks_'+email, decks);
+  loadDecks();
+  showToast('Deck deleted');
+}
+function startStudy(i){
+  const email = DB.get('currentUser');
+  const decks = DB.get('decks_'+email) || [];
+  studyDeck = decks[i];
+  studyDeckIndex = i;
+  studyIndex=0; studyKnew=0; studyMissed=0; studyFlipped=false;
+  document.getElementById('fcCreateView').style.display='none';
+  document.getElementById('fcStudyView').style.display='block';
+  document.getElementById('studyComplete').style.display='none';
+  document.getElementById('studyCard').style.display='block';
+  document.getElementById('studyBtnsFlip').style.display='flex';
+  document.getElementById('studyBtnsRate').style.display='none';
+  document.getElementById('studyDeckName').textContent = studyDeck.name;
+  showStudyCard();
+}
+function showStudyCard(){
+  if(studyIndex >= studyDeck.cards.length){ endStudy(); return; }
+  const card = studyDeck.cards[studyIndex];
+  document.getElementById('studyQuestion').textContent = card.q;
+  document.getElementById('studyAnswer').textContent = card.a;
+  document.getElementById('studyCard').classList.remove('flipped');
+  studyFlipped = false;
+  document.getElementById('studyBtnsFlip').style.display='flex';
+  document.getElementById('studyBtnsRate').style.display='none';
+  const total = studyDeck.cards.length;
+  const pct = Math.round(studyIndex/total*100);
+  document.getElementById('studyProgressFill').style.width = pct+'%';
+  document.getElementById('studyCounter').textContent = `Card ${studyIndex+1} of ${total}`;
+}
+function flipStudyCard(){
+  if(studyFlipped) return;
+  studyFlipped=true;
+  document.getElementById('studyCard').classList.add('flipped');
+  document.getElementById('studyBtnsFlip').style.display='none';
+  document.getElementById('studyBtnsRate').style.display='block';
+}
+function rateCard(knew){
+  if(knew){ studyKnew++; studyDeck.cards[studyIndex].level = Math.min(3,(studyDeck.cards[studyIndex].level||0)+1); }
+  else { studyMissed++; studyDeck.cards[studyIndex].level=0; }
+  studyIndex++;
+  if(studyIndex >= studyDeck.cards.length) endStudy();
+  else showStudyCard();
+}
+function endStudy(){
+  document.getElementById('studyCard').style.display='none';
+  document.getElementById('studyBtnsFlip').style.display='none';
+  document.getElementById('studyBtnsRate').style.display='none';
+  document.getElementById('studyComplete').style.display='block';
+  document.getElementById('studyProgressFill').style.width='100%';
+  document.getElementById('studyCounter').textContent='Complete!';
+  document.getElementById('scoreKnew').textContent=studyKnew;
+  document.getElementById('scoreReview').textContent=studyMissed;
+  const total = studyDeck.cards.length;
+  const pct = Math.round(studyKnew/total*100);
+  document.getElementById('studyCompleteMsg').textContent = pct>=80 ? `Excellent! You knew ${pct}% of the cards.` : pct>=50 ? `Good progress! Keep reviewing the tricky ones.` : `Keep going — review this deck again soon!`;
+  // save updated levels
+  const email = DB.get('currentUser');
+  const decks = DB.get('decks_'+email) || [];
+  if(studyDeckIndex !== undefined) decks[studyDeckIndex] = studyDeck;
+  DB.set('decks_'+email, decks);
+  incStat('cards');
+  addActivity('🃏', `Studied "${studyDeck.name}" — ${studyKnew}/${total} correct`);
+}
+function restartStudy(){
+  studyIndex=0; studyKnew=0; studyMissed=0; studyFlipped=false;
+  document.getElementById('studyComplete').style.display='none';
+  document.getElementById('studyCard').style.display='block';
+  document.getElementById('studyCard').classList.remove('flipped');
+  document.getElementById('studyBtnsFlip').style.display='flex';
+  document.getElementById('studyBtnsRate').style.display='none';
+  showStudyCard();
+}
+function exitStudyMode(){
+  document.getElementById('fcStudyView').style.display='none';
+  document.getElementById('fcCreateView').style.display='block';
+  loadDecks();
+}
+
+// ───────────────────────────────────────────────
+// SUMMARIZE TOOL
+// ───────────────────────────────────────────────
+async function runSummarize(){
+  const text = document.getElementById('summarizeInput').value.trim();
+  const style = document.getElementById('summaryStyle').value;
+  if(!text){ showToast('Please paste some notes first','error'); return; }
+  const btn = document.getElementById('summarizeBtn');
+  const out = document.getElementById('summarizeOutput');
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Summarizing…';
+  out.innerHTML='<div class="output-placeholder"><span class="output-placeholder-icon">⏳</span>Creating your summary…</div>';
+  
+  const styleMap = {
+    bullets:`Return a JSON object with: "context" (1 sentence overview), "bullets" (array of 5-7 key takeaways as strings), "bottomLine" (1 sentence most important insight). No markdown or backticks — only raw JSON.`,
+    outline:`Return a JSON object with: "context" (1 sentence), "sections" (array of {title, points: string[]}), "bottomLine". Raw JSON only.`,
+    brief:`Return a JSON object with: "summary" (exactly 3 sentences, clear and informative), "bottomLine" (1 key insight). Raw JSON only.`
+  };
+  
+  const prompt = `You are Lumina, an AI study assistant. Summarize the following notes. ${styleMap[style]}\n\nNotes:\n${text.slice(0,3000)}`;
+  try {
+    const result = await callClaude([{role:'user',content:prompt}]);
+    const clean = result.replace(/```json|```/g,'').trim();
+    const data = JSON.parse(clean);
+    renderSummary(data, style);
+    document.getElementById('summarizeCopyBtn').style.display='inline-flex';
+    incStat('summaries');
+    addActivity('📝', 'Summarized notes (' + text.split(' ').length + ' words → key points)');
+  } catch(e){
+    out.innerHTML='<div class="output-placeholder"><span class="output-placeholder-icon">⚠️</span>Could not generate summary. Try shorter text.</div>';
+  }
+  btn.disabled=false; btn.innerHTML='<span>Summarize with Lumina</span> <span>→</span>';
+}
+function renderSummary(data, style){
+  const out = document.getElementById('summarizeOutput');
+  let html = '';
+  if(style==='bullets'){
+    html += `<p style="font-size:15px;color:var(--ink-light);margin-bottom:16px;font-style:italic">${data.context||''}</p>`;
+    html += '<ul class="summary-output-list">';
+    (data.bullets||[]).forEach(b=>{ html+=`<li><span class="summary-bullet"></span><span>${b}</span></li>`; });
+    html += '</ul>';
+  } else if(style==='outline'){
+    html += `<p style="font-size:15px;color:var(--ink-light);margin-bottom:16px;font-style:italic">${data.context||''}</p>`;
+    (data.sections||[]).forEach(sec=>{
+      html += `<div class="summary-section-title">${sec.title}</div><ul class="summary-output-list">`;
+      (sec.points||[]).forEach(p=>{ html+=`<li><span class="summary-bullet"></span><span>${p}</span></li>`; });
+      html += '</ul>';
+    });
+  } else {
+    html += `<p style="font-size:16px;color:var(--ink);line-height:1.8">${data.summary||''}</p>`;
+  }
+  if(data.bottomLine){
+    html += `<div class="summary-bottom-line">💡 <strong>Key insight:</strong> ${data.bottomLine}</div>`;
+  }
+  out.innerHTML = `<div id="summaryContent">${html}</div>`;
+}
+
+// ───────────────────────────────────────────────
+// STUDY PLANNER
+// ───────────────────────────────────────────────
+function addSubject(){
+  const list = document.getElementById('subjectList');
+  const row = document.createElement('div');
+  row.className='subject-row';
+  row.innerHTML=`<input class="subject-input" placeholder="Subject (e.g. Calculus)"/><input class="date-input" type="date"/><button class="subject-remove" onclick="removeSubject(this)">×</button>`;
+  list.appendChild(row);
+}
+function removeSubject(btn){ btn.closest('.subject-row').remove(); }
+
+async function runPlanner(){
+  const rows = document.querySelectorAll('#subjectList .subject-row');
+  const subjects = [];
+  rows.forEach(r=>{
+    const sub = r.querySelector('.subject-input').value.trim();
+    const date = r.querySelector('.date-input').value;
+    if(sub) subjects.push({subject:sub, exam:date||'End of term'});
+  });
+  if(!subjects.length){ showToast('Please add at least one subject','error'); return; }
+  const hours = parseInt(document.getElementById('hoursPerDay').value, 10);
+  const btn = document.getElementById('plannerBtn');
+  const out = document.getElementById('plannerOutput');
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Building your plan…';
+  out.innerHTML='<div style="text-align:center;padding:40px;color:var(--ink-light)">Creating your personalised study plan…</div>';
+
+  const today = new Date().toISOString().split('T')[0];
+  const prompt = `You are Lumina, a study planner AI. Create a 2-week study plan for a student studying ${hours} hours per day.
+Subjects and exam dates: ${JSON.stringify(subjects)}
+Today's date: ${today}
+
+Return ONLY a raw JSON array (no markdown, no backticks) of week objects. Each week object: {"week": 1, "title": "Week of [date range]", "days": [{"day": "Mon", "tasks": [{"subject": "...", "task": "...", "minutes": 45}]}]}
+Include 5 days per week (Mon-Fri). Each day should have 2-3 tasks totalling ~${hours*60} minutes. Tasks should be specific (e.g. "Review Chapter 3: Covalent Bonds", "Practice problems 4.1-4.5", not just "Study").`;
+
+  try {
+    const result = await callClaude([{role:'user',content:prompt}], 1500);
+    const clean = result.replace(/```json|```/g,'').trim();
+    const plan = JSON.parse(clean);
+    // Save to localStorage
+    const email = DB.get('currentUser');
+    const existingPlan = DB.get('plan_'+email) || {};
+    const savedPlan = {subjects, created:new Date().toLocaleDateString(), tasks: existingPlan.tasks || {}};
+    DB.set('plan_'+email, savedPlan);
+    renderPlan(plan, email);
+    addActivity('📅', `Created study plan for ${subjects.map(s=>s.subject).join(', ')}`);
+    showToast('Study plan created!','success');
+  } catch(e){
+    out.innerHTML='<div style="text-align:center;padding:40px;color:var(--red)">Could not generate plan. Please try again.</div>';
+    console.error(e);
+  }
+  btn.disabled=false; btn.innerHTML='<span>Generate Study Plan</span> <span>→</span>';
+}
+
+function renderPlan(plan, email){
+  const out = document.getElementById('plannerOutput');
+  const savedPlan = DB.get('plan_'+email) || {tasks:{}};
+  out.innerHTML = plan.map((week,wi)=>{
+    const days = week.days || [];
+    return `<div class="plan-week">
+      <div class="plan-week-title">${week.title||'Week '+(wi+1)} <span class="week-badge">Week ${wi+1}</span></div>
+      <div class="plan-days">${days.map(day=>`
+        <div class="plan-day">
+          <div class="plan-day-name">${day.day}</div>
+          ${(day.tasks||[]).map((task,ti)=>{
+            const key = `w${wi}d${day.day}t${ti}`;
+            const done = savedPlan.tasks[key];
+            return `<div class="plan-task ${done?'done':''}" id="task-${key}" data-key="${key}" onclick="toggleTask(this)">
+              <div class="plan-task-check">${done?'✓':''}</div>
+              <div><span class="plan-task-subject">${task.subject}</span><span class="plan-task-text">${task.task}</span><span class="plan-task-time">${task.minutes} min</span></div>
+            </div>`;
+          }).join('')}
+        </div>
+      `).join('')}</div>
+    </div>`;
+  }).join('');
+}
+
+function toggleTask(el){
+  const key = el.dataset.key;
+  const email = DB.get('currentUser');
+  const savedPlan = DB.get('plan_'+email) || {tasks:{}};
+  savedPlan.tasks[key] = !savedPlan.tasks[key];
+  DB.set('plan_'+email, savedPlan);
+  el.classList.toggle('done', savedPlan.tasks[key]);
+  el.querySelector('.plan-task-check').textContent = savedPlan.tasks[key]?'✓':'';
+}
+
+// ───────────────────────────────────────────────
+// SETTINGS
+// ───────────────────────────────────────────────
+function loadSettings(){
+  const email = DB.get('currentUser');
+  const users = DB.get('users') || {};
+  const user = users[email];
+  if(!user) return;
+  document.getElementById('settingsName').value = user.name;
+  document.getElementById('settingsEmail').value = user.email;
+  document.getElementById('memberSince').textContent = user.joined||'—';
+  const pb = document.getElementById('currentPlanBadge');
+  pb.textContent = user.plan.charAt(0).toUpperCase()+user.plan.slice(1);
+  pb.className = 'plan-badge'+(user.plan!=='free'?' pro':'');
+  const s = user.stats||{};
+  document.getElementById('usageExplain').textContent = s.explain||0;
+  document.getElementById('usageSummaries').textContent = s.summaries||0;
+  document.getElementById('usageDecks').textContent = s.decks||0;
+}
+function saveProfile(){
+  const email = DB.get('currentUser');
+  const users = DB.get('users') || {};
+  if(!users[email]) return;
+  users[email].name = document.getElementById('settingsName').value.trim()||users[email].name;
+  DB.set('users', users);
+  loadUserUI();
+  showToast('Profile saved','success');
+}
+function upgradePlan(plan){
+  const email = DB.get('currentUser');
+  const users = DB.get('users') || {};
+  if(!users[email]) return;
+  users[email].plan = plan;
+  DB.set('users', users);
+  loadUserUI();
+  loadSettings();
+  showToast(`Upgraded to ${plan.charAt(0).toUpperCase()+plan.slice(1)}! 🎉`,'success');
+}
+function clearAllData(){
+  if(!confirm('This will delete all your flashcard decks, study plans, and history. Are you sure?')) return;
+  const email = DB.get('currentUser');
+  DB.del('decks_'+email);
+  DB.del('activity_'+email);
+  DB.del('plan_'+email);
+  const users = DB.get('users')||{};
+  if(users[email]) users[email].stats={explain:0,decks:0,cards:0,summaries:0};
+  DB.set('users', users);
+  navigate('dashboard');
+  showToast('All data cleared');
+}
+
+// ───────────────────────────────────────────────
+// UTILITIES
+// ───────────────────────────────────────────────
+function formatAIText(text){
+  // Paragraph splits MUST happen before single \n→<br> or \n\n will never match
+  return text
+    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g,'<em>$1</em>')
+    .replace(/^### (.+)$/gm,'<h4 style="font-family:var(--serif);font-size:18px;margin:18px 0 8px;color:var(--ink)">$1</h4>')
+    .replace(/^## (.+)$/gm,'<h3 style="font-family:var(--serif);font-size:20px;margin:20px 0 10px;color:var(--ink)">$1</h3>')
+    .replace(/^[-•] (.+)$/gm,'<li style="margin:6px 0;padding-left:4px">$1</li>')
+    .replace(/((<li[^>]*>.*<\/li>\n?)+)/g,'<ul style="padding-left:20px;margin:12px 0">$1</ul>')
+    .replace(/\n\n+/g,'</p><p style="margin-top:14px">')
+    .replace(/\n/g,'<br>');
+}
+function copyOutput(id){
+  const el = document.getElementById(id);
+  const text = el ? el.innerText : '';
+  navigator.clipboard.writeText(text).then(()=>showToast('Copied to clipboard','success'));
+}
+function showToast(msg, type=''){
+  const t = document.createElement('div');
+  t.className = 'toast'+(type?' '+type:'');
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(), 3000);
+}
+function scrollToTop(){ window.scrollTo({top:0,behavior:'smooth'}); }
+function scrollToSection(sel){ document.querySelector(sel)?.scrollIntoView({behavior:'smooth'}); }
+
+// Dropzone drag events
+const dz = document.getElementById('explainDropzone');
+if(dz){
+  dz.addEventListener('dragover', e=>{ e.preventDefault(); dz.classList.add('drag-over'); });
+  dz.addEventListener('dragleave', ()=>dz.classList.remove('drag-over'));
+  dz.addEventListener('drop', e=>{ e.preventDefault(); dz.classList.remove('drag-over'); const f=e.dataTransfer.files[0]; if(f){ document.getElementById('explainFileInput').files=e.dataTransfer.files; handleExplainFile({target:{files:e.dataTransfer.files}}); } });
+}
+
+// Scroll animations on landing
+const obs = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{ if(e.isIntersecting){ e.target.style.animation='fadeUp .6s ease both'; e.target.style.opacity='1'; obs.unobserve(e.target); } });
+},{threshold:0.1});
+document.querySelectorAll('.feature-card,.pricing-card,.testimonial').forEach(el=>{ el.style.opacity='0'; obs.observe(el); });
+
+// Auto-login if session exists
+window.addEventListener('load', ()=>{
+  const email = DB.get('currentUser');
+  if(email && (DB.get('users')||{})[email]) launchApp();
+});
+</script>
+</body>
+</html>
